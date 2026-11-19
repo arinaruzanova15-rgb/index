@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Рисуй за 3 секунды</title>
+<style>
+:root{--bg:#f6f3ec;--fg:#1d1d1f;--muted:#6b6b70;--btn:#1d1d1f;--btnfg:#f6f3ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1e;--fg:#f4f1ea;--muted:#a0a0a6;--btn:#f4f1ea;--btnfg:#1b1b1e}}
+:root[data-theme="dark"]{--bg:#1b1b1e;--fg:#f4f1ea;--muted:#a0a0a6;--btn:#f4f1ea;--btnfg:#1b1b1e}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:"Comic Neue","Marker Felt","Segoe Print",system-ui,sans-serif;
+display:flex;flex-direction:column;transition:background .15s}
+body.run{background:var(--c,var(--bg));color:#1d1d1f}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:20px}
+#word{font-size:clamp(44px,14vw,140px);font-weight:700;line-height:1.05;overflow-wrap:anywhere;max-width:100%}
+#hint{color:var(--muted);font-size:1.05rem;max-width:32ch;line-height:1.4}
+body.run #hint{color:rgba(0,0,0,.6)}
+#bar{height:10px;width:100%;background:rgba(127,127,127,.2)}
+#fill{height:100%;width:100%;background:currentColor;transform-origin:left}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;padding:20px}
+button{font:inherit;font-weight:700;font-size:1.1rem;padding:14px 28px;border:0;border-radius:999px;background:var(--btn);color:var(--btnfg);cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+button.ghost{background:transparent;color:inherit;border:2px solid currentColor}
+label{display:flex;align-items:center;gap:8px;font-size:1rem}
+select{font:inherit;padding:8px 10px;border-radius:8px;border:2px solid currentColor;background:transparent;color:inherit}
+#count{font-size:.95rem;opacity:.7}
+</style>
+</head>
+<body>
+<div id="bar"><div id="fill"></div></div>
+<main>
+  <div id="word" aria-live="polite">Готов?</div>
+  <div id="hint">Каждые 3 секунды появляется новое слово. Успей нарисовать!</div>
+  <div id="count"></div>
+</main>
+<div class="row">
+  <button id="go">Старт</button>
+  <label>Секунд:
+    <select id="sec"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>10</option></select>
+  </label>
+</div>
+<script>
+const WORDS="кот,собака,дом,дерево,солнце,луна,звезда,облако,дождь,радуга,гора,река,море,остров,пальма,цветок,гриб,яблоко,банан,арбуз,морковь,пицца,бургер,мороженое,торт,чашка,чайник,ложка,вилка,нож,стул,стол,кровать,лампа,часы,телефон,компьютер,книга,ручка,ножницы,ключ,замок,зонт,очки,шляпа,носок,ботинок,платье,рюкзак,велосипед,машина,автобус,самолёт,вертолёт,корабль,лодка,поезд,ракета,робот,привидение,дракон,единорог,динозавр,слон,жираф,лев,тигр,обезьяна,пингвин,сова,бабочка,паук,рыба,акула,кит,черепаха,лягушка,змея,утка,курица,корова,свинья,лошадь,заяц,лиса,медведь,волк,ёжик,мышь,улитка,пчела,божья коровка,замок,мост,башня,маяк,палатка,костёр,вулкан,снеговик,ёлка,подарок,воздушный шар,корона,меч,щит,пират,космонавт,ниндзя,король,повар,клоун,гитара,барабан,пианино,микрофон,наушники,камера,футбол,баскетбол,теннис,лыжи,сердце,глаз,рука,нога,зуб,нос,улыбка,молния,торнадо,снежинка,огонь,капля,алмаз,монета,сундук,карта,компас,лупа,лопата,молоток,пила,лестница,дверь,окно,ворота,флаг,свеча,бутылка,стакан,тарелка,сковорода,холодильник,телевизор,душ,ванна,зеркало,расчёска,мыло,кактус,подсолнух,роза,ананас,клубника,виноград,лимон,вишня,груша,арбуз,хлеб,сыр,яйцо,пончик,попкорн,кофе,чай".split(",");
+const COLORS=["#ffd166","#ef476f","#06d6a0","#8ecae6","#ffb4a2","#c8b6ff","#b8f2a0","#ffc6ff","#fdffb6"];
+const $=id=>document.getElementById(id);
+let pool=[],timer=null,n=0,running=false,last="";
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function next(){
+  if(!pool.length){pool=shuffle([...new Set(WORDS)]);if(pool[pool.length-1]===last)pool.reverse()}
+  last=pool.pop();n++;
+  $("word").textContent=last;
+  $("count").textContent="Слово №"+n;
+  document.body.style.setProperty("--c",COLORS[n%COLORS.length]);
+  const s=+$("sec").value;
+  const f=$("fill");
+  f.style.transition="none";f.style.transform="scaleX(1)";
+  void f.offsetWidth;
+  f.style.transition="transform "+s+"s linear";f.style.transform="scaleX(0)";
+}
+function start(){
+  running=true;n=0;document.body.classList.add("run");
+  $("hint").style.display="none";$("go").textContent="Стоп";
+  next();timer=setInterval(next,+$("sec").value*1000);
+}
+function stop(){
+  running=false;clearInterval(timer);document.body.classList.remove("run");
+  $("go").textContent="Заново";$("hint").style.display="";
+  $("hint").textContent="Нарисовано слов: "+n+". Ещё раз?";
+  $("word").textContent="Стоп!";
+  $("fill").style.transition="none";$("fill").style.transform="scaleX(1)";
+}
+$("go").onclick=()=>running?stop():start();
+$("sec").onchange=()=>{if(running){clearInterval(timer);timer=setInterval(next,+$("sec").value*1000);next()}};
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&e.target.tagName!=="SELECT"){e.preventDefault();$("go").click()}});
+</script>
+</body>
+</html>
