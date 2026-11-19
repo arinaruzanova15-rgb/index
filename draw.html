@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Рисуй 20 слов</title>
+<title>Рисуй 20 рисунков</title>
 <style>
 :root{--bg:#f6f3ec;--fg:#1d1d1f;--muted:#6b6b70;--btn:#1d1d1f;--btnfg:#f6f3ec;--line:#d9d4c7;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -16,18 +16,16 @@ body{background:var(--bg);color:var(--fg);font-family:"Comic Neue","Marker Felt"
 #start,#result{padding:24px;align-items:center;text-align:center;gap:16px}
 #start{justify-content:center}
 h1{font-size:clamp(34px,8vw,72px);margin:0}
-p{color:var(--muted);max-width:36ch;line-height:1.4;margin:0}
+p{color:var(--muted);max-width:38ch;line-height:1.4;margin:0}
 button{font:inherit;font-weight:700;font-size:1.1rem;padding:14px 28px;border:0;border-radius:999px;background:var(--btn);color:var(--btnfg);cursor:pointer}
-button.ghost{background:transparent;color:var(--fg);border:2px solid var(--fg);padding:8px 18px}
+button.ghost{background:transparent;color:var(--fg);border:2px solid var(--fg);padding:10px 18px}
 button:focus-visible,select:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
 select{font:inherit;padding:8px 10px;border-radius:8px;border:2px solid var(--fg);background:transparent;color:var(--fg)}
 #game{height:100vh;height:100dvh;overflow:hidden}
-#top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px}
-#word{font-size:clamp(28px,6vw,56px);font-weight:700;line-height:1.1}
-#cnt{color:var(--muted);font-size:1rem;white-space:nowrap}
-#bar{height:10px;background:var(--line)}
-#fill{height:100%;background:var(--fg);transform-origin:left}
-#stage{flex:1;position:relative;margin:8px 12px;border-radius:12px;overflow:hidden;border:2px solid var(--line)}
+#top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;flex-wrap:wrap}
+#cnt{font-size:clamp(22px,4vw,36px);font-weight:700}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+#stage{flex:1;position:relative;margin:4px 12px 8px;border-radius:12px;overflow:hidden;border:2px solid var(--line)}
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;background:#fff}
 #tools{display:flex;gap:12px;justify-content:center;align-items:center;padding:6px 12px 12px}
 .c{width:44px;height:44px;border-radius:50%;border:3px solid transparent;padding:0}
@@ -35,38 +33,37 @@ select{font:inherit;padding:8px 10px;border-radius:8px;border:2px solid var(--fg
 .w{width:44px;height:44px;padding:0;display:grid;place-items:center;background:transparent;border:2px solid var(--line)}
 .w i{display:block;background:var(--fg);border-radius:50%}
 .w.sel{border-color:var(--fg)}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;width:100%;max-width:1100px;margin:0}
-.card{background:var(--bg);border:2px solid var(--line);border-radius:12px;overflow:hidden;text-align:left}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;width:100%;max-width:1100px}
+.card{border:2px solid var(--line);border-radius:12px;overflow:hidden;text-align:left}
 .card img{display:block;width:100%;height:auto;-webkit-user-select:auto;user-select:auto}
 .card b{display:block;padding:8px 12px}
 </style>
 </head>
 <body>
 <section id="start" class="screen on">
-  <h1>Рисуй 20 слов</h1>
-  <p>Появляется слово, и ты рисуешь его пальцем или Apple Pencil. Время вышло, и слово меняется. В конце все 20 рисунков покажутся вместе.</p>
-  <label>Секунд на слово: <select id="sec"><option>3</option><option>5</option><option>10</option></select></label>
-  <button id="go">Старт</button>
+  <h1>Рисуй по слову</h1>
+  <p>Друг называет слово, ты рисуешь его пальцем или Apple Pencil. Нарисовал и нажимаешь «Дальше», и открывается чистый холст. В конце все рисунки покажутся вместе.</p>
+  <label>Сколько рисунков: <select id="num"><option>10</option><option selected>20</option><option>30</option></select></label>
+  <button id="go">Начать</button>
 </section>
 <section id="game" class="screen">
-  <div id="top"><div id="word"></div><div id="cnt"></div><button class="ghost" id="stop">Стоп</button></div>
-  <div id="bar"><div id="fill"></div></div>
+  <div id="top"><div id="cnt"></div>
+    <div class="btns"><button class="ghost" id="clr">Очистить</button><button class="ghost" id="stop">Закончить</button><button id="next">Дальше</button></div>
+  </div>
   <div id="stage"><canvas id="cv"></canvas></div>
   <div id="tools" aria-label="Инструменты"></div>
 </section>
 <section id="result" class="screen">
   <h1 id="rt">Готово!</h1>
-  <p id="rp">Чтобы сохранить рисунок на iPad, нажми на него и подержи палец.</p>
+  <p>Чтобы сохранить рисунок на iPad, нажми на него и подержи палец.</p>
   <div id="grid"></div>
   <button id="again">Играть снова</button>
 </section>
 <script>
-const WORDS="кот,собака,дом,дерево,солнце,луна,звезда,облако,дождь,радуга,гора,река,море,остров,пальма,цветок,гриб,яблоко,банан,арбуз,морковь,пицца,бургер,мороженое,торт,чашка,чайник,ложка,вилка,стул,стол,кровать,лампа,часы,телефон,компьютер,книга,ручка,ножницы,ключ,замок,зонт,очки,шляпа,носок,ботинок,платье,рюкзак,велосипед,машина,автобус,самолёт,вертолёт,корабль,лодка,поезд,ракета,робот,привидение,дракон,единорог,динозавр,слон,жираф,лев,тигр,обезьяна,пингвин,сова,бабочка,паук,рыба,акула,кит,черепаха,лягушка,змея,утка,курица,корова,свинья,лошадь,заяц,лиса,медведь,волк,ёжик,мышь,улитка,пчела,мост,башня,маяк,палатка,костёр,вулкан,снеговик,ёлка,подарок,воздушный шар,корона,меч,пират,космонавт,король,повар,клоун,гитара,барабан,пианино,наушники,камера,футбол,сердце,глаз,рука,нога,зуб,улыбка,молния,снежинка,огонь,капля,алмаз,сундук,карта,лупа,лопата,молоток,лестница,дверь,окно,флаг,свеча,бутылка,тарелка,сковорода,холодильник,телевизор,зеркало,кактус,подсолнух,роза,ананас,клубника,виноград,лимон,вишня,хлеб,сыр,яйцо,пончик,крокодил,бегемот,кенгуру,панда,олень,белка,попугай,орёл,лебедь,краб,осьминог,медуза,дельфин,тыква,помидор,картошка,кукуруза,пирамида,планета,комета,шахматы,мяч,качели,парашют,трактор,мотоцикл,чемодан,ведро,лейка,пылесос,утюг,радио,компас,термометр,доктор,учитель,художник,принцесса,рыцарь,ведьма,русалка,пещера,водопад,озеро,пустыня,пляж".split(",");
-const COLORS=["#111111","#e63946","#1d6fd8","#2a9d4f","#f4a300"],SIZES=[4,12],LIMIT=20;
+const COLORS=["#111111","#e63946","#1d6fd8","#2a9d4f","#f4a300"],SIZES=[4,12];
 const $=id=>document.getElementById(id),cv=$("cv"),ctx=cv.getContext("2d");
-let pool=[],timer=null,items=[],cur=null,color=COLORS[0],size=SIZES[0],drawing=false,lx=0,ly=0,running=false;
+let items=[],limit=20,color=COLORS[0],size=SIZES[0],drawing=false,lx=0,ly=0,running=false;
 const show=id=>document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 function paper(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle="#fff";ctx.fillRect(0,0,cv.width,cv.height);ctx.restore()}
 function fit(){const r=cv.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);ctx.setTransform(d,0,0,d,0,0);paper()}
 function pos(e){const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
@@ -83,32 +80,31 @@ function tools(){
 function snap(){
   const W=640,H=Math.round(W*cv.height/cv.width),o=document.createElement("canvas");
   o.width=W;o.height=H;o.getContext("2d").drawImage(cv,0,0,W,H);
-  items.push({w:cur,src:o.toDataURL("image/jpeg",.85)});
+  items.push(o.toDataURL("image/jpeg",.85));
 }
-function tick(){
-  if(cur)snap();
-  if(items.length>=LIMIT){finish(true);return}
-  if(!pool.length)pool=shuffle([...new Set(WORDS)]);
-  cur=pool.pop();
-  $("word").textContent=cur;$("cnt").textContent=(items.length+1)+" из "+LIMIT;
-  paper();
-  const f=$("fill"),s=+$("sec").value;
-  f.style.transition="none";f.style.transform="scaleX(1)";void f.offsetWidth;
-  f.style.transition="transform "+s+"s linear";f.style.transform="scaleX(0)";
+function label(){
+  const k=items.length+1;
+  $("cnt").textContent="Рисунок "+k+" из "+limit;
+  $("next").textContent=k>=limit?"Готово":"Дальше";
 }
 function start(){
-  items=[];cur=null;running=true;show("game");tools();fit();
-  tick();timer=setInterval(tick,+$("sec").value*1000);
+  items=[];limit=+$("num").value;running=true;show("game");tools();fit();label();
+}
+function next(){
+  snap();
+  if(items.length>=limit){finish(true);return}
+  paper();label();
 }
 function finish(done){
-  running=false;clearInterval(timer);
-  if(!done&&cur){snap()}
-  cur=null;
-  $("rt").textContent=done?"Готово! Все 20 рисунков":"Остановлено: "+items.length+" рис.";
-  $("grid").innerHTML=items.map((it,i)=>'<div class="card"><img src="'+it.src+'" alt="'+it.w+'"><b>'+(i+1)+". "+it.w+"</b></div>").join("");
+  running=false;
+  if(!done)snap();
+  $("rt").textContent=done?"Готово! Все "+items.length+" рисунков":"Нарисовано: "+items.length;
+  $("grid").innerHTML=items.map((s,i)=>'<div class="card"><img src="'+s+'" alt="Рисунок '+(i+1)+'"><b>'+(i+1)+"</b></div>").join("");
   show("result");scrollTo(0,0);
 }
 $("go").onclick=start;
+$("next").onclick=next;
+$("clr").onclick=paper;
 $("stop").onclick=()=>finish(false);
 $("again").onclick=()=>show("start");
 </script>
